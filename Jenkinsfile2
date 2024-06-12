@@ -68,7 +68,7 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "sudo docker push kranthi619/Dev-project:v1"
+                        sh "sudo docker push kranthi619/dev-project:v1"
                     }
                 }
             }

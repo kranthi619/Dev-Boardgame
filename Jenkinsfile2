@@ -67,7 +67,7 @@ pipeline {
         stage('publish docker image to docker hub') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                    withDockerRegistry(credentialsId: 'kranthi619-docker', toolName: 'docker') {
                         sh "sudo docker push kranthi619/dev-project:v1"
                     }
                 }

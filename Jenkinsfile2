@@ -57,5 +57,21 @@ pipeline {
                 }
             }
         }
+
+        stage('trivy Image Scan') { 
+            steps {
+                sh "trivy image --format table -o trivy-image-report.html kranthi619/Dev-project:v1"
+            }
+        }
+
+        stage('publish docker image to docker hub') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh "sudo docker push kranthi619/Dev-project:v1"
+                    }
+                }
+            }
+        }
     }
 }

@@ -52,7 +52,7 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
-                        sh "sudo docker build -t kranthi619/Dev-project:v1 ."
+                        sh "sudo docker build -t kranthi619/dev-project:v1 ."
                     }
                 }
             }
@@ -60,7 +60,7 @@ pipeline {
 
         stage('trivy Image Scan') { 
             steps {
-                sh "trivy image --format table -o trivy-image-report.html kranthi619/Dev-project:v1"
+                sh "trivy image --format table -o trivy-image-report.html kranthi619/dev-project:v1"
             }
         }
 

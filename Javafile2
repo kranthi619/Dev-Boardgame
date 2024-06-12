@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'jdk17'
+        maven 'maven3'
+    }
+
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+
+    stages {
+        stage('git check out') {
+            steps {
+                git changelog: false, credentialsId: 'kranthi619', poll: false, url: 'https://github.com/kranthi619/Dev-Boardgame.git'
+            }
+        }
+
+        stage('compile') {
+            steps {
+                sh "mvn test -DskipTests=true"
+            }
+        }
+
+        stage('rivy Scan') {
+            steps {
+                sh "trivy fs --format table -o trivy-fs-report.html ."
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=dev-project \
+                        -Dsonar.projectName=dev-project \
+                        -Dsonar.java.binaries=.'''
+                }
+            }
+        }
+
+        stage('Deploy artfacts in nexus') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'maven-settings', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
+                    sh "mvn deploy -DskipTests=true"
+                }
+            }
+        }
+
+        stage('build and Tag Docker image') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh "sudo docker build -t kranthi619/Dev-project:v1 ."
+                    }
+                }
+            }
+        }
+    }
+}

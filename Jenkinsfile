@@ -45,5 +45,39 @@ pipeline {
                 sh "mvn package -DskipTests=true"
             }
         }
+
+       stage('Deploy artfacts in nexus') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'maven-settings', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
+                    sh "mvn deploy -DskipTests=true"
+                }
+            }
+        }
+
+        stage('build and Tag Docker image') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'Docker-Hub', toolName: 'docker') {
+                        sh "sudo docker build -t kranthi619/dev-project:latest ."
+                    }
+                }
+            }
+        }
+
+        stage('trivy Image Scan') { 
+            steps {
+                sh "trivy image --format table -o trivy-image-report.html kranthi619/dev-project:latest"
+            }
+        }
+
+        stage('publish docker image to docker hub') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'Docker-Hub', toolName: 'docker') {
+                        sh "sudo docker push kranthi619/dev-project:latest"
+                    }
+                }
+            }
+        } 
     }
 }

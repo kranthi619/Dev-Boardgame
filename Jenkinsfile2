@@ -51,8 +51,8 @@ pipeline {
         stage('build and Tag Docker image') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'kranthi619-docker', toolName: 'docker') {
-                        sh "sudo docker build -t kranthi619/dev-project:v1 ."
+                    withDockerRegistry(credentialsId: 'Docker-Hub', toolName: 'docker') {
+                        sh "sudo docker build -t kranthi619/dev-project:latest ."
                     }
                 }
             }
@@ -60,15 +60,15 @@ pipeline {
 
         stage('trivy Image Scan') { 
             steps {
-                sh "trivy image --format table -o trivy-image-report.html kranthi619/dev-project:v1"
+                sh "trivy image --format table -o trivy-image-report.html kranthi619/dev-project:latest"
             }
         }
 
         stage('publish docker image to docker hub') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'kranthi619-docker', toolName: 'docker') {
-                        sh "sudo docker push kranthi619/dev-project:v1 "
+                    withDockerRegistry(credentialsId: 'Docker-Hub', toolName: 'docker') {
+                        sh "sudo docker push kranthi619/dev-project:latest"
                     }
                 }
             }

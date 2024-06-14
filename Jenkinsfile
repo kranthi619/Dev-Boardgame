@@ -46,7 +46,7 @@ pipeline {
             }
         }
 
-       stage('Deploy artfacts in nexus') {
+        stage('Deploy Artifacts to Nexus') {
             steps {
                 withMaven(globalMavenSettingsConfig: 'maven-settings', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
                     sh "mvn deploy -DskipTests=true"
@@ -54,30 +54,25 @@ pipeline {
             }
         }
 
-        stage('build and Tag Docker image') {
+        stage('Docker Image Creation') {
             steps {
-                script {
-                    withDockerRegistry(credentialsId: 'Docker-Hub', toolName: 'docker') {
-                        sh "sudo docker build -t kranthi619/dev-project:latest ."
-                    }
-                }
+                echo 'Building Docker image using Dockerfile'
+                sh 'docker build -t kranthi619/dev-project .'
             }
         }
 
-        stage('trivy Image Scan') { 
+        stage('Trivy Image Scan') {
             steps {
                 sh "trivy image --format table -o trivy-image-report.html kranthi619/dev-project:latest"
             }
         }
 
-        stage('publish docker image to docker hub') {
+        stage('Docker Login and Push') {
             steps {
-                script {
-                    withDockerRegistry(credentialsId: 'Docker-Hub', toolName: 'docker') {
-                        sh "sudo docker push kranthi619/dev-project:latest"
-                    }
-                }
+                echo 'Logging in to Docker Hub'
+                sh 'docker login -u kranthi619 -p Kranthi123#'
+                sh 'docker push kranthi619/dev-project'
             }
-        } 
+        }
     }
 }
